@@ -46,7 +46,7 @@ jobs:
           MOVIE_NOTION_TOKEN: ${{ secrets.MOVIE_NOTION_TOKEN }}
           NOTION_MOVIE_URL: ${{ secrets.NOTION_MOVIE_URL }}
           NOTION_BOOK_URL: ${{ secrets.NOTION_BOOK_URL }}
-          DOUBAN_NAME: ${{ secrets.NOTION_BOOK_URL }}
+          DOUBAN_NAME: ${{ secrets.DOUBAN_NAME }}
         run: |
           echo $BOOK_NOTION_TOKEN >> secrets.txt
           echo $MOVIE_NOTION_TOKEN >> secrets.txt
