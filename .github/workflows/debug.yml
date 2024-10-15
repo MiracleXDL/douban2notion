@@ -48,9 +48,11 @@ jobs:
           NOTION_BOOK_URL: ${{ secrets.NOTION_BOOK_URL }}
           DOUBAN_NAME: ${{ secrets.NOTION_BOOK_URL }}
         run: |
-          echo $REFRESH_TOKEN >> secrets.txt
-          echo $NOTION_TOKEN >> secrets.txt
-          echo $NOTION_PAGE >> secrets.txt
+          echo $BOOK_NOTION_TOKEN >> secrets.txt
+          echo $MOVIE_NOTION_TOKEN >> secrets.txt
+          echo $NOTION_MOVIE_URL >> secrets.txt
+          echo $NOTION_BOOK_URL >> secrets.txt
+          echo $DOUBAN_NAME >> secrets.txt
       - name: push
         run: |
           git config --local user.email "action@github.com"
