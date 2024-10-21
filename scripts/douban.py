@@ -48,6 +48,12 @@ headers = {
     "authorization": f"Bearer {AUTH_TOKEN}" if AUTH_TOKEN else "",
     "user-agent": "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.16(0x18001023) NetType/WIFI Language/zh_CN",
     "referer": "https://servicewechat.com/wx2f9b06c1de1ccfca/84/page-frame.html",
+    "Cookie":'ll="108097"; bid=oINmip7AHoo; __utmz=30149280.1728610351.2.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); dbcl2="50264485:X+9rMV6zjqg"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.5026; ck=r1b9; frodotk_db="4ac5c30b213a4b25e051492163aee16f"; ap_v=0,6.0; __utma=30149280.1459744444.1727788561.1729050867.1729473485.5; __utmb=30149280.0.10.1729473485; __utmc=30149280'
+}
+
+parse_headers = {
+    "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
+    "Cookie": 'll="108097"; bid=oINmip7AHoo; __utmz=30149280.1728610351.2.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); dbcl2="50264485:X+9rMV6zjqg"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.5026; ck=r1b9; frodotk_db="4ac5c30b213a4b25e051492163aee16f"; ap_v=0,6.0; __utma=30149280.1459744444.1727788561.1729050867.1729473485.5; __utmb=30149280.0.10.1729473485; __utmc=30149280',
 }
 
 
@@ -92,7 +98,7 @@ def insert_movie():
         notion_movie_dict[movie.get("豆瓣链接")] = {
             "短评": movie.get("短评"),
             "状态": movie.get("状态"),
-            "日期": movie.get("日期"),
+            "观影日期": movie.get("观影日期"),
             "评分": movie.get("评分"),
             "page_id": i.get("id"),
         }
@@ -113,7 +119,7 @@ def insert_movie():
         create_time = pendulum.parse(create_time, tz=utils.tz)
         # 时间上传到Notion会丢掉秒的信息，这里直接将秒设置为0
         create_time = create_time.replace(second=0)
-        movie["日期"] = create_time.int_timestamp
+        movie["观影日期"] = create_time.int_timestamp
         movie["豆瓣链接"] = subject.get("url")
         movie.update(parse_movie(subject.get("url")))
         movie["状态"] = movie_status.get(result.get("status"))
@@ -270,11 +276,7 @@ def extract_earliest_date(dates):
 
 def parse_movie(link):
     print(link)
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
-        "Cookie": 'll="108097"; bid=oINmip7AHoo; __utmz=30149280.1728610351.2.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); dbcl2="50264485:X+9rMV6zjqg"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.5026; ck=r1b9; frodotk_db="4ac5c30b213a4b25e051492163aee16f"; ap_v=0,6.0; __utma=30149280.1459744444.1727788561.1729050867.1729473485.5; __utmb=30149280.0.10.1729473485; __utmc=30149280',
-    }
-    response = requests.get(link, headers=headers)
+    response = requests.get(link, headers=parse_headers)
     soup = BeautifulSoup(response.content)
     title = soup.find(property="v:itemreviewed").string
     year = soup.find("span", {"class": "year"}).string[1:-1]
@@ -297,15 +299,21 @@ def parse_movie(link):
     actors = [x.string for x in info.find_all(rel="v:starring")]
     release_date = [x.string for x in info.find_all(property="v:initialReleaseDate")]
     release_date = extract_earliest_date(release_date)
+    duration = info.find(property="v:runtime")
+    count = None
+    if duration:
+        duration = duration.string
     for span in info.find_all("span", {"class": "pl"}):
-        print(f"{span.string} = {span.next_sibling.string.strip()}")
         if "制片国家/地区:" == span.string:
             country = span.next_sibling.string.strip().split("/")
         if "语言:" == span.string:
             language = span.next_sibling.string.strip().split("/")
         if "又名:" == span.string:
             subtitle = span.next_sibling.string.strip()
-
+        if "单集片长:" == span.string:
+            duration = span.next_sibling.string.strip()        
+        if "集数:" == span.string:
+            count = span.next_sibling.string.strip()
     movie_info = {
         "电影名": title,
         "上映年份": year,
@@ -314,6 +322,8 @@ def parse_movie(link):
         "语言": language,
         "又名": subtitle,
         "上映日期": release_date,
+        "片长时间": duration,
+        "集数": count,
         "演员": [
             notion_helper.get_relation_id(
                 x, notion_helper.actor_database_id, USER_ICON_URL
@@ -332,11 +342,7 @@ def parse_movie(link):
 
 
 def parse_book(link):
-    headers = {
-        "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
-        "Cookie": 'll="108097"; bid=oINmip7AHoo; __utmz=30149280.1728610351.2.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); dbcl2="50264485:X+9rMV6zjqg"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.5026; ck=r1b9; frodotk_db="4ac5c30b213a4b25e051492163aee16f"; ap_v=0,6.0; __utma=30149280.1459744444.1727788561.1729050867.1729473485.5; __utmb=30149280.0.10.1729473485; __utmc=30149280',
-    }
-    response = requests.get(link, headers=headers)
+    response = requests.get(link, headers=parse_headers)
     soup = BeautifulSoup(response.content)
     title = soup.find(property="v:itemreviewed").string
     cover = soup.find(id="mainpic").img["src"]
@@ -370,3 +376,4 @@ if __name__ == "__main__":
         insert_movie()
     else:
         insert_book()
+    # parse_movie("https://movie.douban.com/subject/34885342/")

@@ -238,7 +238,7 @@ def get_properties(dict1, dict2):
                 ]
             }
         elif type == NUMBER:
-            property = {"number": value}
+            property = {"number": int(value)}
         elif type == STATUS:
             property = {"status": {"name": value}}
         elif type == FILES:
