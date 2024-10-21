@@ -39,6 +39,7 @@ class NotionHelper:
         "CATEGORY_DATABASE_NAME": "分类",
         "DIRECTOR_DATABASE_NAME": "导演",
         "AUTHOR_DATABASE_NAME": "作者",
+        "ACTOR_DATABASE_NAME": "演员",
     }
     database_id_dict = {}
     image_dict = {}
@@ -84,6 +85,9 @@ class NotionHelper:
         )
         self.author_database_id = self.database_id_dict.get(
             self.database_name_dict.get("AUTHOR_DATABASE_NAME")
+        )    
+        self.actor_database_id = self.database_id_dict.get(
+            self.database_name_dict.get("ACTOR_DATABASE_NAME")
         )
         if self.day_database_id:
             self.write_database_id(self.day_database_id)
