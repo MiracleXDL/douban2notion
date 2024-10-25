@@ -48,12 +48,12 @@ headers = {
     "authorization": f"Bearer {AUTH_TOKEN}" if AUTH_TOKEN else "",
     "user-agent": "User-Agent: Mozilla/5.0 (iPhone; CPU iPhone OS 15_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 MicroMessenger/8.0.16(0x18001023) NetType/WIFI Language/zh_CN",
     "referer": "https://servicewechat.com/wx2f9b06c1de1ccfca/84/page-frame.html",
-    "Cookie":'ll="108097"; bid=oINmip7AHoo; __utmz=30149280.1728610351.2.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); dbcl2="50264485:X+9rMV6zjqg"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.5026; ck=r1b9; frodotk_db="4ac5c30b213a4b25e051492163aee16f"; ap_v=0,6.0; __utma=30149280.1459744444.1727788561.1729050867.1729473485.5; __utmb=30149280.0.10.1729473485; __utmc=30149280'
+    "Cookie":os.getenv("COOKIE")
 }
 
 parse_headers = {
     "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/104.0.0.0 Safari/537.36",
-    "Cookie": 'll="108097"; bid=oINmip7AHoo; __utmz=30149280.1728610351.2.2.utmcsr=google|utmccn=(organic)|utmcmd=organic|utmctr=(not%20provided); dbcl2="50264485:X+9rMV6zjqg"; push_noty_num=0; push_doumail_num=0; __utmv=30149280.5026; ck=r1b9; frodotk_db="4ac5c30b213a4b25e051492163aee16f"; ap_v=0,6.0; __utma=30149280.1459744444.1727788561.1729050867.1729473485.5; __utmb=30149280.0.10.1729473485; __utmc=30149280',
+    "Cookie": os.getenv("COOKIE")
 }
 
 
@@ -359,7 +359,8 @@ def parse_book(link):
         else:
             book_info[span.string.replace(":","")] = next_sibling.string.strip()
     if book_info.get("出版年"):
-        book_info["出版年份"] = book_info.get("出版年").split("-")[0]
+        year= book_info.get("出版年").split("-")[0]
+        book_info["出版年份"] = year.split("/")[0]
     return book_info
 
 
@@ -377,4 +378,3 @@ if __name__ == "__main__":
         insert_movie()
     else:
         insert_book()
-    # parse_movie("https://movie.douban.com/subject/34885342/")
