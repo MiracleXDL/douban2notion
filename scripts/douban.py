@@ -342,6 +342,7 @@ def parse_movie(link):
 
 
 def parse_book(link):
+    print(link)
     response = requests.get(link, headers=parse_headers)
     soup = BeautifulSoup(response.content)
     title = soup.find(property="v:itemreviewed").string
